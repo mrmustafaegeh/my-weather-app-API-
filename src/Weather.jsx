@@ -53,13 +53,14 @@ export default function Weather() {
     <div className="card">
       <div className="search">
         <input
+          className="text-box"
           type="text"
           placeholder="Enter a city"
           value={searchCity}
           onChange={(e) => setSearchCity(e.target.value)}
           onKeyDown={handleKeyPress}
         />
-        <button onClick={() => checkWeather(searchCity)}>
+        <button className="search-btn" onClick={() => checkWeather(searchCity)}>
           <img src={search} alt="search" />
         </button>
       </div>
