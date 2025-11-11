@@ -49,6 +49,14 @@ body {
   width: 60px;
   height: 60px;
   cursor: pointer;
+  background: #ebfffc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.search-icon {
+  width: 16px;
 }
 
 .search-btn-img {

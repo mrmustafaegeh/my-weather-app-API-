@@ -2,7 +2,7 @@ import { useState } from "react";
 import rain from "./images/rain.png";
 import humidity from "./images/humidity.png";
 import wind from "./images/wind.png";
-import search from "./images/search.png";
+import { FaSearch } from "react-icons/fa";
 import "./weather.css";
 
 export default function Weather() {
@@ -61,7 +61,7 @@ export default function Weather() {
           onKeyDown={handleKeyPress}
         />
         <button className="search-btn" onClick={() => checkWeather(searchCity)}>
-          <img src={search} alt="search" />
+          <FaSearch />
         </button>
       </div>
 
