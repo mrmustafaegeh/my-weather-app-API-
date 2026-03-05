@@ -24,35 +24,38 @@ We rejected the "Information Overload" pattern found in most weather apps.
 
 ---
 
-## 🏗️ Architecture & Features
+## 🏗️ Technical Architecture & Systems Scale
 
-### 🌈 Intelligent Background System (`/src/design/backgroundSystem.ts`)
-The core of the visual experience. A dedicated logic layer maps raw weather data (ID, Temperature, Time) to specific CSS gradients.
-- **Mathematical Maps**: 7 Conditions x 4 Times of Day = 28 unique atmospheric states.
-- **Performance**: Zero distinct images loaded. Pure CSS generation means instant rendering and 60fps animations on any device.
+### 🧠 Domain-Driven Design (`/src/domain`)
+We strictly separate **business logic** from **UI components**.
+- **`normalization.ts`**: The "Gatekeeper". Every API response is intercepted, sanitized, and typed before entering the application state. It rejects malformed data, clamps values (e.g., humidity 0-100), and ensures strictly typed contracts.
+- **`weatherLogic.ts`**: Pure calculation modules that derive intelligence (Comfort Index, Stability Trends) from raw data. 100% testable and side-effect free.
 
-### 🧘 unique "Weather Mood"
-Data alone doesn't convey feeling. We implemented a semantic layer that translates `12°C, Rain, Wind 15km/h` into **"Wild & Stormy"**. This humanizes the forecast.
+### 🛡️ Data Integrity Strategy
+Accuracy is non-negotiable.
+1.  **Metric First**: The system core runs on Metric units. Conversions are handled at the very last display layer to prevent floating-point drift.
+2.  **Schema Versioning**: The `CacheController` versions the IndexedDB schema. If the data model evolves, old cache entries are automatically invalidated, preventing "white screen of death" crashes.
+3.  **Normalization Pipeline**: API responses are not trusted blindly. Missing fields trigger specific fallbacks or errors, rather than undefined UI states.
 
-### 🕰️ Day Rhythm Timeline
-Instead of a generic list, we present the day as a story: **Morning → Afternoon → Evening → Night**. This helps users plan their day intuitively.
-- **Smart Aggregation**: The app scans the next 24 hours of forecast data to pick representative weather points for each phase of the day.
+### ⚡ Performance Engineering
+- **Request Deduplication**: `WeatherService` tracks in-flight promises. requesting "Paris" 5 times rapidly results in exactly **1** network call.
+- **Stale Request Abortion**: Typing "New Y..." and correcting to "New Ark" cancels the previous searches instantly via `AbortController`, saving bandwidth and battery.
+- **Render Discipline**: Components like `HourlyForecast` are optimized to only re-render when their specific data slice changes.
+- **CLS = 0**: All image assets have explicit width/height attributes reserved before loading.
 
-### 🤖 Minimal AI
-We use Large Language Models (LLMs) ethically and sparingly.
-- **No Chatbots**: Weather isn't a conversation.
-- **Smart Summary**: A single, high-value sentence (e.g., *"Perfect for a run, but bring a light jacket as winds pick up."*).
-- **Cached**: AI requests are aggressively cached to respect user data and API costs.
+### ♿ Accessibility & SEO
+- **Semantic HTML**: Proper `<header>`, `<main>`, `<section>` usage.
+- **Contrast**: The "sunglasses" overlay (`bg-black/15`) ensures WCAG AA compliance even on bright weather backgrounds.
+- **Reduced Motion**: All animations respect the user's OS preference for reduced motion.
+- **Meta**: OpenGraph and Twitter card tags are dynamically updated (future enhancement).
 
 ---
 
-## ⚡ Performance Engineering
-
-Speed is a feature.
-1.  **Zero Layout Shift (CLS)**: All images have explicit dimensions. Skeletons occupy exact pixel space during loading.
-2.  **Request Deduplication**: Rapid typing in the search bar cancels stale requests via `AbortController`, saving battery and bandwidth.
-3.  **Local-First**: Geolocation and preferences are resolved instantly.
-4.  **Optimized Bundle**: Tree-shaken icons (Lucide React) and minimal dependencies.
+## 🎨 Design System: "Atmospheric Realism"
+We moved beyond "Glassmorphism" to **Atmospheric Depth**.
+- **Procedural Backgrounds**: Instead of heavy JPGs, we use 28+ CSS-generated gradients mapped to `(Condition x Time_of_Day)`.
+- **Noise Texture**: A specific SVG noise filter removes color banding and adds a "premium" film-grain texture.
+- **Context-Aware UI**: The interface adapts to the weather. If it's storming, the "Trend" card highlights pressure drops. If it's hot, the "Comfort" index warns of heat stress.
 
 ---
 

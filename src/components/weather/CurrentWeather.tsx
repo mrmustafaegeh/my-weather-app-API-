@@ -27,11 +27,19 @@ export const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
       </h2>
       
       <div className="flex flex-col items-center my-2">
-        <span className="text-[6rem] md:text-[9rem] font-light leading-none tracking-tighter drop-shadow-lg">
+        <span 
+          className="text-[6rem] md:text-[9rem] font-light leading-none tracking-tighter drop-shadow-lg"
+          aria-label={`Current temperature ${temp} degrees`}
+          role="text"
+        >
           {temp}°
         </span>
-        <p className="text-xl md:text-2xl font-light opacity-90 mt-2">{data.weather[0].description}</p>
-        <p className="text-lg font-medium opacity-80 mt-1">{mood}</p>
+        <p className="text-xl md:text-2xl font-light opacity-90 mt-2" aria-live="polite">
+            {data.weather[0].description}
+        </p>
+        <p className="text-lg font-medium opacity-80 mt-1" aria-label={`Weather mood: ${mood}`}>
+            {mood}
+        </p>
       </div>
 
       <div className="flex items-center gap-6 text-lg mt-4 opacity-80">

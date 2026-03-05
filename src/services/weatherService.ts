@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { WeatherData, ForecastData } from '../types/weather';
 import { CacheService } from './cacheService';
+import { validateWeatherData, validateForecastData } from '../domain/normalization';
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.openweathermap.org/data/2.5';
@@ -15,7 +16,7 @@ export const WeatherService = {
   async getWeather(city: string, units: 'metric' | 'imperial' = 'metric', signal?: AbortSignal): Promise<WeatherData> {
     const cacheKey = `weather_${city}_${units}`;
     const cached = await CacheService.getValid(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as WeatherData;
 
     const requestKey = `getWeather:${city}:${units}`;
     if (this.inflightRequests.has(requestKey)) {
@@ -28,8 +29,9 @@ export const WeatherService = {
                 params: { q: city, appid: API_KEY, units },
                 signal
             });
-            await CacheService.set(cacheKey, response.data, 600); // 10 mins
-            return response.data;
+            const validData = validateWeatherData(response.data);
+            await CacheService.set(cacheKey, validData, 600); // 10 mins
+            return validData;
         } finally {
             this.inflightRequests.delete(requestKey);
         }
@@ -42,7 +44,7 @@ export const WeatherService = {
   async getForecast(city: string, units: 'metric' | 'imperial' = 'metric', signal?: AbortSignal): Promise<ForecastData> {
     const cacheKey = `forecast_${city}_${units}`;
     const cached = await CacheService.getValid(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as ForecastData;
 
     const requestKey = `getForecast:${city}:${units}`;
     if (this.inflightRequests.has(requestKey)) return this.inflightRequests.get(requestKey);
@@ -53,8 +55,9 @@ export const WeatherService = {
                 params: { q: city, appid: API_KEY, units },
                 signal
             });
-            await CacheService.set(cacheKey, response.data, 1800); // 30 mins
-            return response.data;
+            const validData = validateForecastData(response.data);
+            await CacheService.set(cacheKey, validData, 1800); // 30 mins
+            return validData;
         } finally {
             this.inflightRequests.delete(requestKey);
         }
@@ -67,7 +70,7 @@ export const WeatherService = {
   async getWeatherByCoords(lat: number, lon: number, units: 'metric' | 'imperial' = 'metric', signal?: AbortSignal): Promise<WeatherData> {
     const cacheKey = `weather_${lat}_${lon}_${units}`;
     const cached = await CacheService.getValid(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as WeatherData;
 
     const requestKey = `getWeatherByCoords:${lat}:${lon}:${units}`;
     if (this.inflightRequests.has(requestKey)) return this.inflightRequests.get(requestKey);
@@ -78,8 +81,9 @@ export const WeatherService = {
                 params: { lat, lon, appid: API_KEY, units },
                 signal
             });
-            await CacheService.set(cacheKey, response.data, 600);
-            return response.data;
+            const validData = validateWeatherData(response.data);
+            await CacheService.set(cacheKey, validData, 600);
+            return validData;
         } finally {
             this.inflightRequests.delete(requestKey);
         }
@@ -92,7 +96,7 @@ export const WeatherService = {
   async getForecastByCoords(lat: number, lon: number, units: 'metric' | 'imperial' = 'metric', signal?: AbortSignal): Promise<ForecastData> {
     const cacheKey = `forecast_${lat}_${lon}_${units}`;
     const cached = await CacheService.getValid(cacheKey);
-    if (cached) return cached;
+    if (cached) return cached as ForecastData;
 
     const requestKey = `getForecastByCoords:${lat}:${lon}:${units}`;
     if (this.inflightRequests.has(requestKey)) return this.inflightRequests.get(requestKey);
@@ -103,8 +107,9 @@ export const WeatherService = {
                 params: { lat, lon, appid: API_KEY, units },
                 signal
             });
-            await CacheService.set(cacheKey, response.data, 1800);
-            return response.data;
+            const validData = validateForecastData(response.data);
+            await CacheService.set(cacheKey, validData, 1800);
+            return validData;
         } finally {
             this.inflightRequests.delete(requestKey);
         }
